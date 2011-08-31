@@ -1,4 +1,4 @@
-name := "SBT Test Project"
+name := "sbt-scalatra-example"
 
 version := "0.1"
 
