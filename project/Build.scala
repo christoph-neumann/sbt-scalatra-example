@@ -3,6 +3,11 @@ import Keys._
 
 object SbtTestBuild extends Build {
 	lazy val root = Project("root", file(".")) settings(
+		// Do not include the scala version or the project version in the artifact name
+		artifactName := { (config: String, module: ModuleID, artifact: Artifact) =>
+			artifact.name + "." + artifact.extension
+		},
+
 		// Custom tasks
 		cleanAll <<= cleanAllTask,
 		cleanAll <<= cleanAll.dependsOn(clean in Compile),
