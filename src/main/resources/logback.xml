@@ -1,0 +1,15 @@
+<configuration>
+
+  <appender name="devel.stdout" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{ISO8601} %-5level %-20c{0} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="org.eclipse" level="info"/>
+
+  <root level="debug">
+    <appender-ref ref="devel.stdout"/>
+  </root>
+
+</configuration>
