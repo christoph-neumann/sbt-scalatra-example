@@ -1,7 +1,7 @@
 package svc
 
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.server.handler.ContextHandlerCollection
+import org.eclipse.jetty.server.handler.{ContextHandler, ContextHandlerCollection, ResourceHandler}
 import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 
 import org.scalatra.ScalatraServlet
@@ -21,7 +21,7 @@ object WebService extends Service with Logging {
 		JettyServer.stop
 	}
 
-	class HelloServlet extends ScalatraServlet with Logging {
+	class ExampleApp extends ScalatraServlet with Logging {
 		notFound { response.setStatus(404) ; "" }
 
 		get("/hello/:name") {
@@ -33,12 +33,23 @@ object WebService extends Service with Logging {
 
 	private object JettyServer extends Logging {
 
-		private val appContext = new ServletContextHandler(ServletContextHandler.SESSIONS)
-		appContext.addServlet(new ServletHolder(new HelloServlet), "/*")
+		// Setup the handler for the static content. This can coexist with the same context path as
+		// the Scalatra servlet. The "DefaultServlet" can't.
+		private val staticContext = new ContextHandler()
+		staticContext.setContextPath("/")
+		staticContext.setResourceBase(Config.webRoot)
+		staticContext.setHandler(new ResourceHandler())
 
+		// Setup the Scalatra servlet.
+		private val appContext = new ServletContextHandler(ServletContextHandler.SESSIONS)
+		appContext.addServlet(new ServletHolder(new ExampleApp), "/*")
+
+		// All the contexts
 		private val collection = new ContextHandlerCollection()
+		collection.addHandler(staticContext)
 		collection.addHandler(appContext)
 
+		// Create the server and associate the config.
 		private val server = new Server(Config.webPort)
 		server.setSendServerVersion(false)
 		server.setHandler(collection)

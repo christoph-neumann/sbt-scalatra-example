@@ -27,13 +27,17 @@ object SbtTestBuild extends Build {
 	val dist = TaskKey[Unit]("dist", "Produce a distribution.")
 	def distTask = (streams, baseDirectory, externalDependencyClasspath in Runtime, artifactPath in makePom) map {
 		(out, basedir, deps, aPath) => {
-			val scripts = new File(basedir, "src/main/scripts")
 			val dist = new File(basedir, "target/dist")
 			val lib = new File(dist, "lib")
 			val artifacts = aPath.getParentFile
 
+			// Copy the whole web tree.
+			val dist_web = new File(dist, "web")
+			dist_web.mkdir
+			IO.copyDirectory(new File(basedir, "src/main/web"), dist_web)
+
 			// Copy everything in the scripts directory and make all the shell scripts executable.
-			IO.copyDirectory(scripts, dist)
+			IO.copyDirectory(new File(basedir, "src/main/scripts"), dist)
 			for ( file <- dist.listFiles; if (file.isFile && file.name.endsWith("sh")) ) yield {
 				file.setExecutable(true)
 			}
