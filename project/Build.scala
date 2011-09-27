@@ -8,6 +8,9 @@ object SbtTestBuild extends Build {
 			artifact.name + "." + artifact.extension
 		},
 
+		// Make sure the jars are in the exported classpath instead of class directories
+		exportJars := true,
+
 		// Custom tasks
 		cleanAll <<= cleanAllTask,
 		cleanAll <<= cleanAll.dependsOn(clean in Compile),
@@ -25,11 +28,10 @@ object SbtTestBuild extends Build {
 	}
 
 	val dist = TaskKey[Unit]("dist", "Produce a distribution.")
-	def distTask = (streams, baseDirectory, externalDependencyClasspath in Runtime, artifactPath in makePom) map {
-		(out, basedir, deps, aPath) => {
+	def distTask = (streams, baseDirectory, fullClasspath in Runtime) map {
+		(out, basedir, deps) => {
 			val dist = new File(basedir, "target/dist")
 			val lib = new File(dist, "lib")
-			val artifacts = aPath.getParentFile
 
 			// Copy the whole web tree.
 			val dist_web = new File(dist, "web")
@@ -40,13 +42,6 @@ object SbtTestBuild extends Build {
 			IO.copyDirectory(new File(basedir, "src/main/scripts"), dist)
 			for ( file <- dist.listFiles; if (file.isFile && file.name.endsWith("sh")) ) yield {
 				file.setExecutable(true)
-			}
-
-			// Get the jar that was produced from the "package" task and copy it into the "lib"
-			// directory
-			for ( file <- artifacts.listFiles; if (file.isFile && file.name.endsWith(".jar")) ) yield {
-				out.log.info("Copying "+ file.getName)
-				IO.copyFile(file, new File(lib, file.getName))
 			}
 
 			// Copy all the dependencies into the "lib" directory.
