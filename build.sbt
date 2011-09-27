@@ -3,8 +3,8 @@ name := "sbt-scalatra-example"
 scalaVersion := "2.9.1"
 
 {
-var scalatraVersion = "2.1.0-SNAPSHOT"
-var jettyVersion = "7.4.1.v20110513"
+val scalatraVersion = "2.1.0-SNAPSHOT"
+val jettyVersion = "7.4.1.v20110513"
 libraryDependencies ++= Seq (
 	"org.eclipse.jetty" % "jetty-server" % jettyVersion,
 	"org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
